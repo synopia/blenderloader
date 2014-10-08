@@ -15,6 +15,7 @@ public class Parser {
 
     public static int pointerSize;
     private RAFDataInput dis;
+    private SDNA sdna;
 
     public Parser(RAFDataInput dis) {
         this.dis = dis;
@@ -160,19 +161,8 @@ public class Parser {
                 structures.add(structure);
             }
             for (Structure structure : structures) {
-                for (Field field : structure.fields) {
-                    field.type.structure = findStructure(field.type.name, structures);
-                }
+                structure.resolveTypes( structures );
             }
-        }
-
-        private Structure findStructure( String type, List<Structure> structures ) {
-            for (Structure structure : structures) {
-                if( structure.name.equals(type) ) {
-                    return structure;
-                }
-            }
-            return null;
         }
     }
 
@@ -181,7 +171,7 @@ public class Parser {
         FileBlock block = new FileBlock();
         header.load(dis);
         dis.setLittleEndian(header.littleEndian);
-        SDNA sdna = new SDNA();
+        sdna = new SDNA();
 
         while(  !block.code.equals("ENDB")) {
             block = new FileBlock();
@@ -197,28 +187,38 @@ public class Parser {
             dis.seek(pos + block.size);
         }
 
-        BObject root = new BObject();
-        int id = 0;
+        BArray root = new BArray();
         for (FileBlock b : blocks) {
             Structure structure = sdna.structures.get(b.sdnaIndex);
-            if( any(structure.name, "Bone", "bPoseChannel", "Material", "MTex", "Mesh", "MVert", "MEdge", "MLoopUV", "MLoop", "MTexPoly", "MPoly", "") ) {
-                BArray target = new BArray();
-                root.set(id+"", target);
-                dis.seek(b.offset);
-                for (int i = 0; i < b.count; i++) {
-                    BStructureObject object = structure.load(dis);
-                    target.set(i+"", object);
-                }
+            BArray target = new BArray();
+            root.add(target);
+            dis.seek(b.offset);
+            System.out.println(structure.getName()+" ("+b.count+")");
+            for (int i = 0; i < b.count; i++) {
+                BStructuredObject object = structure.load(dis);
+                target.add(object);
             }
-            id++;
         }
         dis.close();
         return root;
     }
 
+    public List<Structure> getStructures() {
+        return sdna.structures;
+    }
+
+    public Structure getStructure( String name ) {
+        for (Structure structure : sdna.structures) {
+            if( structure.getName().equals(name)) {
+                return structure;
+            }
+        }
+        return null;
+    }
+
     private boolean any( String value, String ... any) {
-        for (int i = 0; i < any.length; i++) {
-            if( any[i].equals(value) ) {
+        for (String anAny : any) {
+            if (anAny.equals(value)) {
                 return true;
             }
         }

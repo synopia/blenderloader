@@ -11,18 +11,21 @@ public class BPrimitiveObject extends BObject {
         this.value = value;
     }
 
-    @Override
-    public BObject get(String name) {
-        throw new IllegalStateException();
+    public Object get() {
+        return value;
     }
 
-    @Override
-    public void set(String name, BObject value) {
-        throw new IllegalStateException();
+    public void set(Object value) {
+        this.value = value;
     }
 
     @Override
     public String toString() {
         return value.toString();
+    }
+
+    @Override
+    public <T> T as(Class<T> type) {
+        return (T) value;
     }
 }

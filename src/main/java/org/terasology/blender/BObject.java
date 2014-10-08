@@ -1,6 +1,9 @@
 package org.terasology.blender;
 
+import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
+
 import com.google.common.collect.Maps;
 
 /**
@@ -8,17 +11,33 @@ import com.google.common.collect.Maps;
  */
 public class BObject {
     private Type type;
-    private Map<String, BObject> data = Maps.newHashMap();
 
     public BObject(Type type) {
         this.type = type;
     }
 
-    public BObject get( String name ) {
-        return data.get(name);
+    public int size() {
+        return 1;
     }
 
-    public void set(String name, BObject value) {
-        data.put(name,value );
+    public BObject resolve(String name) {
+        return this;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public <T> T as( Class<T> type) {
+        throw new IllegalStateException();
+    }
+
+    public <T> List<T> asList(Class<T> type) {
+        throw new IllegalStateException();
+    }
+
+    @Override
+    public String toString() {
+        return "@"+type;
     }
 }

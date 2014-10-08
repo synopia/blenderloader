@@ -11,21 +11,21 @@ import com.google.common.collect.Lists;
  * @author synopia
  */
 public class Field {
-    static Pattern ARRAY = Pattern.compile("\\[([0-9])+\\]");
-    public Type type;
-    public String fullName;
-    public String name;
+    static Pattern ARRAY = Pattern.compile("\\[([0-9]+)\\]");
+    private Type type;
+    private String name;
+    private String fullName;
 
-    public boolean isPointer;
-    public boolean isArray;
-    public int arrayLength;
-    List<Integer> arrayDim = Lists.newArrayList();
+    private boolean isPointer;
+    private boolean isArray;
+    private int arrayLength;
+    private List<Integer> arrayDim = Lists.newArrayList();
 
     public Field(Type type, String fullName) {
         this.type = type;
         this.fullName = fullName;
-        name = fullName;
 
+        name = fullName;
         isPointer = fullName.startsWith("*");
         if( isPointer ) {
             name = fullName.substring(1);
@@ -45,15 +45,10 @@ public class Field {
 
     public BObject load( DataInput dis ) throws IOException {
         if( isArray ) {
-            if( type.name.equals("char")) {
-                byte []string = new byte[arrayLength];
-                dis.readFully(string);
-                return new BPrimitiveObject(new String(string));
-            }
-            BArray array = new BArray();
+            BArray array = new BArray(getType());
             for (int i = 0; i < arrayLength; i++) {
                 BObject value = loadSingleValue(dis);
-                array.set(Integer.toString(i), value);
+                array.add(value);
             }
             return array;
         } else {
@@ -69,12 +64,36 @@ public class Field {
         }
     }
 
-    public void set( BObject object, BObject value ) {
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean isPointer() {
+        return isPointer;
+    }
+
+    public boolean isArray() {
+        return isArray;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void set( BStructuredObject object, BObject value ) {
         object.set(name, value);
     }
 
     public int getLength() {
-        int fieldLength = isPointer ? Parser.pointerSize : type.length;
+        int fieldLength = isPointer ? Parser.pointerSize : type.getLength();
         return arrayLength*fieldLength;
     }
 }

@@ -13,8 +13,6 @@ public class Structure extends Type {
 
     public Structure(int id, String name) {
         super(id, name, 0);
-        this.id = id;
-        this.name = name;
     }
 
     public void addField(Type type, String name) {
@@ -22,8 +20,8 @@ public class Structure extends Type {
     }
 
     @Override
-    public BObject load( DataInput dis) throws IOException {
-        BStructureObject object = new BStructureObject(this);
+    public BStructuredObject load( DataInput dis) throws IOException {
+        BStructuredObject object = new BStructuredObject(this);
         for (Field field : fields) {
             BObject fieldValue = field.load(dis);
             field.set(object, fieldValue);
@@ -34,11 +32,30 @@ public class Structure extends Type {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(name).append(" {\n");
+        sb.append(getName()).append(" {\n");
         for (Field field : fields) {
-            sb.append("\t").append(field.type).append(" ").append(field.fullName).append("; // size=").append(field.getLength()).append("\n");
+            sb.append("\t").append(field.getType().getName()).append(" ").append(field.getFullName()).append("; // size=").append(field.getLength()).append("\n");
         }
         sb.append("}\n");
         return sb.toString();
+    }
+
+    public void resolveTypes(List<Structure> structures) {
+        for (Field field : fields) {
+            Structure structure = findStructure(field.getType().getName(), structures);
+            if( structure!=null ) {
+                field.setType(structure);
+            }
+        }
+    }
+
+
+    private Structure findStructure( String type, List<Structure> structures ) {
+        for (Structure structure : structures) {
+            if( structure.getName().equals(type) ) {
+                return structure;
+            }
+        }
+        return null;
     }
 }
