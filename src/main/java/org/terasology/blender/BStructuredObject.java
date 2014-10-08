@@ -9,6 +9,8 @@ import java.util.StringTokenizer;
  * @author synopia
  */
 public class BStructuredObject extends BObject {
+    private long memoryAddress;
+
     public BStructuredObject(Structure structure) {
         super(structure);
     }
@@ -39,5 +41,13 @@ public class BStructuredObject extends BObject {
     @Override
     public Structure getType() {
         return (Structure) super.getType();
+    }
+
+    public void setMemoryAddress(long memoryAddress) {
+        this.memoryAddress = memoryAddress;
+    }
+
+    public long getMemoryAddress() {
+        return memoryAddress;
     }
 }

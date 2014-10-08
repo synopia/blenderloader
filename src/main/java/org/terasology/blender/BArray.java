@@ -26,6 +26,9 @@ public class BArray extends BObject {
 
     @Override
     public <T> List<T> asList(Class<T> type) {
+        if( type==BObject.class ) {
+            return (List<T>) list;
+        }
         List<T> result = Lists.newArrayList();
         for (BObject object : list) {
             result.add(object.as(type));
@@ -35,6 +38,9 @@ public class BArray extends BObject {
 
     @Override
     public <T> T as(Class<T> type) {
+        if( type==String.class) {
+            return (T) toString();
+        }
         List<T> ts = asList(type);
         return (T) ts;
     }

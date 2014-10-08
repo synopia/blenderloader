@@ -1,17 +1,23 @@
 package org.terasology.blender;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import java.io.DataInput;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by synopia on 07/10/14.
  */
 public class Parser {
     private List<FileBlock> blocks = Lists.newArrayList();
+    private List<Long> memory = Lists.newArrayList();
+    private Map<Long, List<BStructuredObject>> objectMap = Maps.newHashMap();
 
     public static int pointerSize;
     private RAFDataInput dis;
@@ -180,6 +186,9 @@ public class Parser {
             block.offset = pos;
             if( block.code.equals("DNA1")) {
                 sdna.load(dis);
+//                for (Structure structure : sdna.structures) {
+//                    System.out.println(structure);
+//                }
             } else if( !block.code.equals("ENDB")) {
                 blocks.add(block);
             }
@@ -193,12 +202,18 @@ public class Parser {
             BArray target = new BArray();
             root.add(target);
             dis.seek(b.offset);
-            System.out.println(structure.getName()+" ("+b.count+")");
+            System.out.println(structure.getName() + " (" + b.count + "x, "+b.size+"b)");
+            memory.add(b.memoryAddress);
+            List<BStructuredObject> objects = Lists.newArrayList();
             for (int i = 0; i < b.count; i++) {
                 BStructuredObject object = structure.load(dis);
+                object.setMemoryAddress(b.memoryAddress);
                 target.add(object);
+                objects.add(object);
             }
+            objectMap.put(b.memoryAddress, objects);
         }
+        Collections.sort(memory);
         dis.close();
         return root;
     }
@@ -214,6 +229,16 @@ public class Parser {
             }
         }
         return null;
+    }
+    public List<BStructuredObject> getStructure( long memoryAddress ) {
+        long found = Long.MAX_VALUE;
+        for (int i = 0; i < memory.size(); i++) {
+             if( memory.get(i)>memoryAddress ) {
+                 found = memory.get(i-1);
+                 break;
+             }
+        }
+        return objectMap.get(found);
     }
 
     private boolean any( String value, String ... any) {

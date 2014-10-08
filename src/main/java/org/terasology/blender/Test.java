@@ -17,7 +17,11 @@ public class Test {
         RAFDataInput dis = new RAFDataInput(new RandomAccessFile(file, "r"));
         Parser parser = new Parser(dis);
         BObject root = parser.load();
-        System.out.println(parser.getStructure("MVert"));
+        System.out.println(parser.getStructure("Bone"));
+        List<String> boneNames = root.resolve("Bone").resolve("name").asList(String.class);
+        List<BObject> bones = root.resolve("Bone").resolve("prop").asList(BObject.class);
+
+        System.out.println(parser.getStructure(-1412465148L));
         BObject mPoly = root.resolve("MPoly");
         List<Integer> loopStart = mPoly.resolve("loopstart").asList(Integer.class);
         List<Integer> totalLoops = mPoly.resolve("totloop").asList(Integer.class);
