@@ -25,4 +25,9 @@ public class BPointer extends BObject {
     public void setAddress(long address) {
         this.address = address;
     }
+
+    @Override
+    public String toString() {
+        return getType().getName()+"@"+getAddress();
+    }
 }

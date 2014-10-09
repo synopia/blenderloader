@@ -28,7 +28,13 @@ public class Test {
         List<Integer> material = mPoly.resolve("mat_nr").asList(Integer.class);
         List<List<Float>> uv = root.resolve("MLoopUV").resolve("uv").as(List.class);
         List<List<Float>> co = root.resolve("MVert").resolve("co").as(List.class);
-        List<List<Float>> no = root.resolve("MVert").resolve("co").as(List.class);
+        List<List<Float>> no = root.resolve("MVert").resolve("no").as(List.class);
+        List<Integer> dg = root.resolve("MDeformWeight").resolve("def_nr").asList(Integer.class);
+        List<String> groups = root.resolve("bDeformGroup").resolve("name").asList(String.class);
+
+        for (String boneName : boneNames) {
+
+        }
 
         for (int i = 0; i < co.size(); i++) {
             System.out.println("vert "+i+" ("+uv.get(i).get(0)+" "+uv.get(i).get(1)+") "+i+" 1");
@@ -41,7 +47,7 @@ public class Test {
             System.out.println("tri "+i+" "+loop+" "+(loop+1)+" "+(loop+2));
         }
         for (int i = 0; i < co.size(); i++) {
-            System.out.println("weight "+i+" 0 1 (" +co.get(i).get(0)+" "+co.get(i).get(1)+" "+co.get(i).get(2)+") ");
+            System.out.println("weight "+i+" "+dg.get(i)+" 1 (" +co.get(i).get(0)+" "+co.get(i).get(1)+" "+co.get(i).get(2)+") ");
         }
     }
 

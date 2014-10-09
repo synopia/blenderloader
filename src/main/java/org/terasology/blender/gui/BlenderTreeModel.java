@@ -1,9 +1,12 @@
 package org.terasology.blender.gui;
 
+import java.util.List;
 import org.terasology.blender.BArray;
 import org.terasology.blender.BObject;
+import org.terasology.blender.BPointer;
 import org.terasology.blender.BStructuredObject;
 import org.terasology.blender.Field;
+import org.terasology.blender.Parser;
 import org.terasology.blender.Structure;
 
 /**
@@ -29,8 +32,12 @@ public class BlenderTreeModel extends AbstractTreeTableModel {
             return field.getName();
         }
     }
-    public BlenderTreeModel(BObject root) {
+
+    private Parser parser;
+    public BlenderTreeModel(Parser parser, BObject root) {
         super(root);
+
+        this.parser = parser;
     }
 
     @Override
@@ -88,6 +95,11 @@ public class BlenderTreeModel extends AbstractTreeTableModel {
             BoundField field = (BoundField) parent;
             return getChild(field.get(), index);
         }
+        if (parent instanceof BPointer) {
+            BPointer pointer = (BPointer) parent;
+            List<BStructuredObject> list = parser.getStructure(pointer.getAddress());
+            return list.get(index);
+        }
         return null;
     }
 
@@ -105,6 +117,11 @@ public class BlenderTreeModel extends AbstractTreeTableModel {
         if (parent instanceof BoundField) {
             BoundField field = (BoundField) parent;
             return getChildCount(field.get());
+        }
+        if (parent instanceof BPointer) {
+            BPointer pointer = (BPointer) parent;
+            List<BStructuredObject> list = parser.getStructure(pointer.getAddress());
+            return list!=null ? list.size() : 0;
         }
         return 0;
     }

@@ -199,7 +199,7 @@ public class Parser {
         BArray root = new BArray();
         for (FileBlock b : blocks) {
             Structure structure = sdna.structures.get(b.sdnaIndex);
-            BArray target = new BArray();
+            BArray target = new BArray(structure);
             root.add(target);
             dis.seek(b.offset);
             System.out.println(structure.getName() + " (" + b.count + "x, "+b.size+"b)");

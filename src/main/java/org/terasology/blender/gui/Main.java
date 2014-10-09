@@ -28,7 +28,7 @@ public class Main {
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-        JTreeTable table = new JTreeTable(new BlenderTreeModel(root));
+        JTreeTable table = new JTreeTable(new BlenderTreeModel(parser, root));
         frame.add(new JScrollPane(table));
 
         frame.setSize(500,500);
