@@ -3,7 +3,6 @@ package org.terasology.blender;
 import com.google.common.collect.Maps;
 
 import java.util.Map;
-import java.util.StringTokenizer;
 
 /**
  * @author synopia

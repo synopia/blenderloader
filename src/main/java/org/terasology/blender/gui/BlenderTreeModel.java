@@ -1,6 +1,5 @@
 package org.terasology.blender.gui;
 
-import java.util.List;
 import org.terasology.blender.BArray;
 import org.terasology.blender.BObject;
 import org.terasology.blender.BPointer;
@@ -8,6 +7,8 @@ import org.terasology.blender.BStructuredObject;
 import org.terasology.blender.Field;
 import org.terasology.blender.Parser;
 import org.terasology.blender.Structure;
+
+import java.util.List;
 
 /**
  * @author synopia
@@ -67,6 +68,10 @@ public class BlenderTreeModel extends AbstractTreeTableModel {
                     BoundField field = (BoundField) node;
                     return field.field.getType().getName();
                 }
+                if (node instanceof BStructuredObject) {
+                    BStructuredObject object = (BStructuredObject) node;
+                    return object.getType().getName();
+                }
             case 2:
                 if (node instanceof BArray) {
                     BArray array = (BArray) node;
@@ -75,6 +80,10 @@ public class BlenderTreeModel extends AbstractTreeTableModel {
                 if (node instanceof BoundField) {
                     BoundField field = (BoundField) node;
                     return field.get();
+                }
+                if (node instanceof BStructuredObject) {
+                    BStructuredObject object = (BStructuredObject) node;
+                    return object.getMemoryAddress();
                 }
             default: return null;
         }
@@ -97,7 +106,7 @@ public class BlenderTreeModel extends AbstractTreeTableModel {
         }
         if (parent instanceof BPointer) {
             BPointer pointer = (BPointer) parent;
-            List<BStructuredObject> list = parser.getStructure(pointer.getAddress());
+            List<BStructuredObject> list = parser.getStructures(pointer.getAddress());
             return list.get(index);
         }
         return null;
@@ -120,7 +129,7 @@ public class BlenderTreeModel extends AbstractTreeTableModel {
         }
         if (parent instanceof BPointer) {
             BPointer pointer = (BPointer) parent;
-            List<BStructuredObject> list = parser.getStructure(pointer.getAddress());
+            List<BStructuredObject> list = parser.getStructures(pointer.getAddress());
             return list!=null ? list.size() : 0;
         }
         return 0;

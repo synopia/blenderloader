@@ -1,18 +1,22 @@
 package org.terasology.blender;
 
+import com.google.common.collect.Lists;
+
 import java.io.DataInput;
 import java.io.IOException;
 import java.util.List;
-import com.google.common.collect.Lists;
 
 /**
  * @author synopia
  */
 public class Structure extends Type {
     public final List<Field> fields = Lists.newArrayList();
+    private Parser parser;
 
-    public Structure(int id, String name) {
+    public Structure(Parser parser, int id, String name) {
         super(id, name, 0);
+
+        this.parser = parser;
     }
 
     public void addField(Type type, String name) {
@@ -28,6 +32,10 @@ public class Structure extends Type {
         BStructuredObject object = new BStructuredObject(this);
         for (Field field : fields) {
             BObject fieldValue = field.load(dis);
+            if (fieldValue instanceof BPointer) {
+                BPointer pointer = (BPointer) fieldValue;
+                pointer.setParser(parser);
+            }
             field.set(object, fieldValue);
         }
         return object;

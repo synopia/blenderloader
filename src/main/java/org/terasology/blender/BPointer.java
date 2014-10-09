@@ -1,12 +1,13 @@
 package org.terasology.blender;
 
-import java.util.StringTokenizer;
+import java.util.List;
 
 /**
  * @author synopia
  */
 public class BPointer extends BObject {
     private long address;
+    private Parser parser;
 
     public BPointer(Type type, long address) {
         super(type);
@@ -15,7 +16,17 @@ public class BPointer extends BObject {
 
     @Override
     public BObject resolve(String name) {
-        return null; // todo
+        return parser.getStructure(address).resolve(name);
+    }
+
+    @Override
+    public <T> T as(Class<T> type) {
+        return (T) parser.getStructure(address);
+    }
+
+    @Override
+    public <T> List<T> asList(Class<T> type) {
+        return (List<T>) parser.getStructures(address);
     }
 
     public long getAddress() {
@@ -29,5 +40,9 @@ public class BPointer extends BObject {
     @Override
     public String toString() {
         return getType().getName()+"@"+getAddress();
+    }
+
+    public void setParser(Parser parser) {
+        this.parser = parser;
     }
 }

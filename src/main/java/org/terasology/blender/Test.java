@@ -1,13 +1,15 @@
 package org.terasology.blender;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.Map;
 
 /**
  * @author synopia
@@ -19,75 +21,90 @@ public class Test {
         RAFDataInput dis = new RAFDataInput(new RandomAccessFile(file, "r"));
         Parser parser = new Parser(dis);
         BObject root = parser.load();
-        List<String> boneNames = root.resolve("Bone").resolve("name").asList(String.class);
-        List<BObject> bones = root.resolve("Bone").resolve("prop").asList(BObject.class);
 
-        BObject mPoly = root.resolve("MPoly");
-        List<Integer> loopStart = mPoly.resolve("loopstart").asList(Integer.class);
-        List<Integer> totalLoops = mPoly.resolve("totloop").asList(Integer.class);
-        List<Integer> loopsVertex = root.resolve("MLoop").resolve("v").asList(Integer.class);
-        List<List<Float>> uv = root.resolve("MLoopUV").resolve("uv").as(List.class);
-        List<List<Float>> co = root.resolve("MVert").resolve("co").as(List.class);
-        List<List<Float>> no = root.resolve("MVert").resolve("no").as(List.class);
-        List<Integer> dg = root.resolve("MDeformWeight").resolve("def_nr").asList(Integer.class);
-        List<String> groups = root.resolve("bDeformGroup").resolve("name").asList(String.class);
+        BObject mesh = root.resolve("Mesh");
+        List<BObject> polys = mesh.resolve("mpoly").asList(BObject.class);
+        List<BObject> loops = mesh.resolve("mloop").asList(BObject.class);
+        List<BObject> uvLoops = mesh.resolve("mloopuv").asList(BObject.class);
+        List<BObject> verts = mesh.resolve("mvert").asList(BObject.class);
+        List<BObject> dverts = mesh.resolve("dvert").asList(BObject.class);
+        List<BObject> defGroups = root.resolve("bDeformGroup").asList(BObject.class);
+        List<BObject> bones = root.resolve("bPoseChannel").asList(BObject.class);
+
+        Map<String, BObject> boneMap = Maps.newHashMap();
+        Map<String, BObject> defgMap = Maps.newHashMap();
+        List<String> groups = Lists.newArrayList();
+        groups.add("root");
+        for (BObject object : defGroups) {
+            String name = object.resolve("name").as(String.class);
+            groups.add(name);
+            defgMap.put(name, object);
+        }
+        for (BObject bone : bones) {
+            String name = bone.resolve("name").as(String.class);
+            boneMap.put(name, bone);
+        }
 
         StringBuilder sb = new StringBuilder();
         sb.append("MD5Version 10\n" +
                 "commandline \"Exported from blenderloader\"\n" +
                 "\n");
-        sb.append("numJoints ").append(1).append("\n");
+        sb.append("numJoints ").append(defGroups.size() + 1).append("\n");
         sb.append("numMeshes 1\n\n");
         sb.append("joints {\n");
-//        for (Bone bone : bones) {
-//
-//            sb.append("\t\"").append(bone.getName()).append("\" ").append(bone.getParentIndex()).append(" ( ");
-//            sb.append(bone.getObjectPosition().x).append(" ");
-//            sb.append(bone.getObjectPosition().y).append(" ");
-//            sb.append(bone.getObjectPosition().z).append(" ) ( ");
-//            Quat4f rot = new Quat4f(bone.getObjectRotation());
-//            rot.normalize();
-//            if (rot.w > 0) {
-//                rot.x = -rot.x;
-//                rot.y = -rot.y;
-//                rot.z = -rot.z;
-//            }
-//            sb.append(rot.x).append(" ");
-//            sb.append(rot.y).append(" ");
-//            sb.append(rot.z).append(" )\n");
-//        }
-        sb.append("\t\"root\"\t-1 ( 0.000000 0.184340 0.000000 ) ( -0.001601 -0.000000 -0.000000 )\n");
+        for (int i = 0; i < groups.size(); i++) {
+            String name = groups.get(i);
+
+            BObject group = defgMap.get(name);
+            BObject bone = boneMap.get(name);
+            BStructuredObject parent = bone.resolve("parent").as(BStructuredObject.class);
+            int parentId = -1;
+            if (parent != null) {
+                parentId = groups.indexOf(parent.resolve("name").as(String.class));
+            }
+            sb.append("\t\"").append(name).append("\" ").append(parentId).append(" ( ");
+
+            List<Float> quat = bone.resolve("quat").asList(Float.class);
+            List<Float> location = bone.resolve("loc").asList(Float.class);
+            sb.append(location.get(0)).append(" ");
+            sb.append(location.get(1)).append(" ");
+            sb.append(location.get(2)).append(" ) ( ");
+
+            sb.append(quat.get(3)).append(" ");
+            sb.append(quat.get(2)).append(" ");
+            sb.append(quat.get(1)).append(" )\n");
+        }
         sb.append("}\n\n");
 
         sb.append("mesh {\n");
         sb.append("\tshader \"texture.png\"\n");
-        sb.append("\tnumverts ").append(co.size()).append("\n");
-        for (int i = 0; i < co.size(); i++) {
-            sb.append("\tvert ").append(i).append(" ( ").append(f(uv.get(i).get(0))).append(" ").append(f(uv.get(i).get(1))).append(" ) ");
-            sb.append(i).append(" ").append(1).append("\n");
+        sb.append("\tnumverts ").append(loops.size()).append("\n");
+        for (int i = 0; i < loops.size(); i++) {
+            List<Float> uv = uvLoops.get(i).resolve("uv").asList(Float.class);
+            Integer vertex = loops.get(i).resolve("v").as(Integer.class);
+            sb.append("\tvert ").append(i).append(" ( ").append(f(uv.get(0))).append(" ").append(f(uv.get(1))).append(" ) ");
+            sb.append(vertex).append(" ").append(1).append("\n");
         }
         sb.append("\n");
-        sb.append("\tnumtris ").append(loopStart.size()).append("\n");
-        for (int i = 0; i < loopStart.size(); i++) {
-            int l1 = loopStart.get(i);
-            int l2 = l1+1;
-            int l3 = l1+2;
+        sb.append("\tnumtris ").append(polys.size()).append("\n");
+        for (int i = 0; i < polys.size(); i++) {
+            BObject poly = polys.get(i);
+            int id = poly.resolve("loopstart").as(Integer.class);
 
-            int ve1 = loopsVertex.get(l1);
-            int ve2 = loopsVertex.get(l2);
-            int ve3 = loopsVertex.get(l3);
+            int v1 = id;
+            int v2 = id + 2;
+            int v3 = id + 1;
 
-            int i1 = ve1;
-            int i2 = ve2;
-            int i3 = ve3;
-            sb.append("\ttri ").append(i).append(" ").append(i1).append(" ").append(i2).append(" ").append(i3).append("\n");
+            sb.append("\ttri ").append(i).append(" ").append(v1).append(" ").append(v2).append(" ").append(v3).append("\n");
         }
         sb.append("\n");
-        sb.append("\tnumweights ").append(co.size()).append("\n");
-        for (int i = 0; i < co.size(); i++) {
-            sb.append("\tweight ").append(i).append(" ").append(0).append(" ");
+        sb.append("\tnumweights ").append(verts.size()).append("\n");
+        for (int i = 0; i < verts.size(); i++) {
+            List<Float> vertex = verts.get(i).resolve("co").asList(Float.class);
+            int bone = dverts.get(i).resolve("dw").resolve("def_nr").as(Integer.class) + 1;
+            sb.append("\tweight ").append(i).append(" ").append(bone).append(" ");
             sb.append(1).append(" ( ");
-            sb.append(f(co.get(i).get(0))).append(" ").append(f(co.get(i).get(1))).append(" ").append(f(co.get(i).get(2))).append(" )\n");
+            sb.append(f(vertex.get(0))).append(" ").append(f(vertex.get(1))).append(" ").append(f(vertex.get(2))).append(" )\n");
         }
         sb.append("}\n");
         System.out.println(sb.toString());

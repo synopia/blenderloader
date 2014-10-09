@@ -6,8 +6,6 @@ import com.google.common.collect.Maps;
 import java.io.DataInput;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -16,8 +14,8 @@ import java.util.Map;
  */
 public class Parser {
     private List<FileBlock> blocks = Lists.newArrayList();
-    private List<Long> memory = Lists.newArrayList();
-    private Map<Long, List<BStructuredObject>> objectMap = Maps.newHashMap();
+    private Map<Long, BStructuredObject> objectMap = Maps.newHashMap();
+    private Map<Long, Long> nextMap = Maps.newHashMap();
 
     public static int pointerSize;
     private RAFDataInput dis;
@@ -101,6 +99,7 @@ public class Parser {
     }
 
     public static class SDNA extends BaseReader {
+        Parser parser;
         String identifier;
         String nameIdentifier;
         List<String> names = Lists.newArrayList();
@@ -115,6 +114,11 @@ public class Parser {
 
         List<Type> types = Lists.newArrayList();
         List<Structure> structures = Lists.newArrayList();
+
+        public SDNA(Parser parser) {
+            this.parser = parser;
+        }
+
         @Override
         public void load(DataInput dis) throws IOException {
             identifier = readString(dis, 4);
@@ -156,7 +160,7 @@ public class Parser {
                 int fieldCnt;
 
                 structureType = dis.readShort();
-                Structure structure = new Structure(i, typeNames.get(structureType));
+                Structure structure = new Structure(parser, i, typeNames.get(structureType));
                 fieldCnt = dis.readShort();
                 for (int j = 0; j < fieldCnt; j++) {
                     short type = dis.readShort();
@@ -177,7 +181,7 @@ public class Parser {
         FileBlock block = new FileBlock();
         header.load(dis);
         dis.setLittleEndian(header.littleEndian);
-        sdna = new SDNA();
+        sdna = new SDNA(this);
 
         while(  !block.code.equals("ENDB")) {
             block = new FileBlock();
@@ -199,17 +203,21 @@ public class Parser {
             BArray target = new BArray(structure);
             root.add(target);
             dis.seek(b.offset);
-            memory.add(b.memoryAddress);
-            List<BStructuredObject> objects = Lists.newArrayList();
+            long startPos = dis.position();
+            long lastAddress = b.memoryAddress;
             for (int i = 0; i < b.count; i++) {
+                long address = b.memoryAddress + dis.position() - startPos;
                 BStructuredObject object = structure.load(dis);
-                object.setMemoryAddress(b.memoryAddress);
+                object.setMemoryAddress(address);
+
                 target.add(object);
-                objects.add(object);
+                objectMap.put(address, object);
+                if (lastAddress != address) {
+                    nextMap.put(lastAddress, address);
+                }
+                lastAddress = address;
             }
-            objectMap.put(b.memoryAddress, objects);
         }
-        Collections.sort(memory);
         dis.close();
         return root;
     }
@@ -226,15 +234,19 @@ public class Parser {
         }
         return null;
     }
-    public List<BStructuredObject> getStructure( long memoryAddress ) {
-        long found = Long.MAX_VALUE;
-        for (int i = 0; i < memory.size(); i++) {
-             if( memory.get(i)>memoryAddress ) {
-                 found = memory.get(i-1);
-                 break;
-             }
+
+    public BStructuredObject getStructure(long memoryAddress) {
+        return objectMap.get(memoryAddress);
+    }
+
+    public List<BStructuredObject> getStructures(long memoryAddress) {
+        List<BStructuredObject> result = Lists.newArrayList();
+        Long address = memoryAddress;
+        while (address != null) {
+            result.add(objectMap.get(address));
+            address = nextMap.get(address);
         }
-        return objectMap.get(found);
+        return result;
     }
 
     private boolean any( String value, String ... any) {
