@@ -172,7 +172,7 @@ public class Parser {
         }
     }
 
-    BObject load() throws IOException, URISyntaxException {
+    public BObject load() throws IOException, URISyntaxException {
         FileHeader header = new FileHeader();
         FileBlock block = new FileBlock();
         header.load(dis);

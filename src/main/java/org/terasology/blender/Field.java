@@ -92,8 +92,17 @@ public class Field {
         object.set(name, value);
     }
 
+    public BObject get( BStructuredObject object ) {
+        return object.get(name);
+    }
+
     public int getLength() {
         int fieldLength = isPointer ? Parser.pointerSize : type.getLength();
         return arrayLength*fieldLength;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

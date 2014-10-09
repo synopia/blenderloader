@@ -19,6 +19,10 @@ public class Structure extends Type {
         fields.add(new Field(type, name));
     }
 
+    public List<Field> getFields() {
+        return fields;
+    }
+
     @Override
     public BStructuredObject load( DataInput dis) throws IOException {
         BStructuredObject object = new BStructuredObject(this);

@@ -50,4 +50,9 @@ public class BStructuredObject extends BObject {
     public long getMemoryAddress() {
         return memoryAddress;
     }
+
+    @Override
+    public String toString() {
+        return getType().getName();
+    }
 }

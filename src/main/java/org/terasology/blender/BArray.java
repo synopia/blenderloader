@@ -91,7 +91,7 @@ public class BArray extends BObject {
             }
             return sb.toString();
         } else {
-            return super.toString();
+            return "List";
         }
     }
 }

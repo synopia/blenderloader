@@ -1,10 +1,6 @@
 package org.terasology.blender;
 
 import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
-
-import com.google.common.collect.Maps;
 
 /**
  * @author synopia
