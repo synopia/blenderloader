@@ -68,7 +68,7 @@ public class RAFDataInput implements DataInput {
 
     @Override
     public short readShort() throws IOException {
-        if( littleEndian ) {
+        if (littleEndian) {
             file.readFully(work, 0, 2);
             return (short) ((work[1] & 0xff) << 8 | (work[0] & 0xff));
         } else {
@@ -78,7 +78,7 @@ public class RAFDataInput implements DataInput {
 
     @Override
     public int readUnsignedShort() throws IOException {
-        if( littleEndian ) {
+        if (littleEndian) {
             file.readFully(work, 0, 2);
             return ((work[1] & 0xff) << 8 | (work[0] & 0xff));
         } else {
@@ -88,7 +88,7 @@ public class RAFDataInput implements DataInput {
 
     @Override
     public char readChar() throws IOException {
-        if( littleEndian ) {
+        if (littleEndian) {
             file.readFully(work, 0, 2);
             return (char) ((work[1] & 0xff) << 8 | (work[0] & 0xff));
         } else {
@@ -98,7 +98,7 @@ public class RAFDataInput implements DataInput {
 
     @Override
     public int readInt() throws IOException {
-        if( littleEndian ) {
+        if (littleEndian) {
             file.readFully(work, 0, 4);
             return (work[3]) << 24
                     | (work[2] & 0xff) << 16
@@ -111,7 +111,7 @@ public class RAFDataInput implements DataInput {
 
     @Override
     public long readLong() throws IOException {
-        if( littleEndian ) {
+        if (littleEndian) {
             file.readFully(work, 0, 8);
             return (long) (work[7]) << 56
                     |
@@ -129,12 +129,12 @@ public class RAFDataInput implements DataInput {
 
     @Override
     public float readFloat() throws IOException {
-        return Float.intBitsToFloat( readInt() );
+        return Float.intBitsToFloat(readInt());
     }
 
     @Override
     public double readDouble() throws IOException {
-        return Double.longBitsToDouble( readLong() );
+        return Double.longBitsToDouble(readLong());
     }
 
     @Override

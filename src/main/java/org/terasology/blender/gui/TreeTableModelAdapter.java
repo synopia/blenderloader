@@ -15,8 +15,7 @@ package org.terasology.blender.gui;
   */
 
 
-import javax.swing.JTree;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
 import javax.swing.event.TreeModelEvent;
@@ -30,13 +29,11 @@ import javax.swing.tree.TreePath;
  * all of the event dispatching support provided by the superclass:
  * the AbstractTableModel.
  *
- * @version 1.2 10/27/98
- *
  * @author Philip Milne
  * @author Scott Violet
+ * @version 1.2 10/27/98
  */
-class TreeTableModelAdapter extends AbstractTableModel
-{
+class TreeTableModelAdapter extends AbstractTableModel {
     JTree tree;
     TreeTableModel treeTableModel;
 
@@ -50,6 +47,7 @@ class TreeTableModelAdapter extends AbstractTableModel
             public void treeExpanded(TreeExpansionEvent event) {
                 fireTableDataChanged();
             }
+
             public void treeCollapsed(TreeExpansionEvent event) {
                 fireTableDataChanged();
             }

@@ -24,7 +24,7 @@ public class BObject {
         return type;
     }
 
-    public <T> T as( Class<T> type) {
+    public <T> T as(Class<T> type) {
         throw new IllegalStateException();
     }
 
@@ -34,6 +34,6 @@ public class BObject {
 
     @Override
     public String toString() {
-        return "@"+type;
+        return "@" + type;
     }
 }

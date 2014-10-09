@@ -19,21 +19,26 @@ public class Type {
         this.length = length;
     }
 
-    public BObject load( DataInput dis ) throws IOException {
+    public BObject load(DataInput dis) throws IOException {
         switch (name) {
-            case "byte": return new BPrimitiveObject(this, dis.readByte());
-            case "short": return new BPrimitiveObject(this, dis.readShort());
+            case "byte":
+                return new BPrimitiveObject(this, dis.readByte());
+            case "short":
+                return new BPrimitiveObject(this, dis.readShort());
             case "float":
                 return new BPrimitiveObject(this, dis.readFloat());
-            case "int": return new BPrimitiveObject(this, dis.readInt());
-            case "uint64_t": return new BPrimitiveObject(this, dis.readLong());
-            case "char": return new BPrimitiveObject(this, (char)dis.readByte());
+            case "int":
+                return new BPrimitiveObject(this, dis.readInt());
+            case "uint64_t":
+                return new BPrimitiveObject(this, dis.readLong());
+            case "char":
+                return new BPrimitiveObject(this, (char) dis.readByte());
             default:
-                throw new IllegalStateException("Unknown primitive type "+name);
+                throw new IllegalStateException("Unknown primitive type " + name);
         }
     }
 
-    public boolean isA( String type ) {
+    public boolean isA(String type) {
         return getName().equals(type);
     }
 

@@ -1,11 +1,12 @@
 package org.terasology.blender;
 
+import com.google.common.collect.Lists;
+
 import java.io.DataInput;
 import java.io.IOException;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.google.common.collect.Lists;
 
 /**
  * @author synopia
@@ -27,7 +28,7 @@ public class Field {
 
         name = fullName;
         isPointer = fullName.startsWith("*");
-        if( isPointer ) {
+        if (isPointer) {
             name = fullName.substring(1);
         }
         Matcher matcher = ARRAY.matcher(fullName);
@@ -38,13 +39,13 @@ public class Field {
             arrayLength *= dim;
             arrayDim.add(dim);
         }
-        if( isArray ) {
+        if (isArray) {
             name = fullName.split("\\[")[0];
         }
     }
 
-    public BObject load( DataInput dis ) throws IOException {
-        if( isArray ) {
+    public BObject load(DataInput dis) throws IOException {
+        if (isArray) {
             BArray array = new BArray(getType());
             for (int i = 0; i < arrayLength; i++) {
                 BObject value = loadSingleValue(dis);
@@ -57,7 +58,7 @@ public class Field {
     }
 
     private BObject loadSingleValue(DataInput dis) throws IOException {
-        if( isPointer ) {
+        if (isPointer) {
             return new BPointer(type, Parser.readPointer(dis));
         } else {
             return type.load(dis);
@@ -88,17 +89,17 @@ public class Field {
         return fullName;
     }
 
-    public void set( BStructuredObject object, BObject value ) {
+    public void set(BStructuredObject object, BObject value) {
         object.set(name, value);
     }
 
-    public BObject get( BStructuredObject object ) {
+    public BObject get(BStructuredObject object) {
         return object.get(name);
     }
 
     public int getLength() {
         int fieldLength = isPointer ? Parser.pointerSize : type.getLength();
-        return arrayLength*fieldLength;
+        return arrayLength * fieldLength;
     }
 
     @Override

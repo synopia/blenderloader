@@ -28,7 +28,7 @@ public class Structure extends Type {
     }
 
     @Override
-    public BStructuredObject load( DataInput dis) throws IOException {
+    public BStructuredObject load(DataInput dis) throws IOException {
         BStructuredObject object = new BStructuredObject(this);
         for (Field field : fields) {
             BObject fieldValue = field.load(dis);
@@ -55,16 +55,16 @@ public class Structure extends Type {
     public void resolveTypes(List<Structure> structures) {
         for (Field field : fields) {
             Structure structure = findStructure(field.getType().getName(), structures);
-            if( structure!=null ) {
+            if (structure != null) {
                 field.setType(structure);
             }
         }
     }
 
 
-    private Structure findStructure( String type, List<Structure> structures ) {
+    private Structure findStructure(String type, List<Structure> structures) {
         for (Structure structure : structures) {
-            if( structure.getName().equals(type) ) {
+            if (structure.getName().equals(type)) {
                 return structure;
             }
         }

@@ -16,12 +16,12 @@ public class BStructuredObject extends BObject {
 
     private Map<String, BObject> data = Maps.newHashMap();
 
-    public BObject get( String name ) {
+    public BObject get(String name) {
         return data.get(name);
     }
 
     public void set(String name, BObject value) {
-        data.put(name,value );
+        data.put(name, value);
     }
 
     @Override
@@ -31,7 +31,7 @@ public class BStructuredObject extends BObject {
 
     @Override
     public BObject resolve(String name) {
-        if( getType().isA(name) ) {
+        if (getType().isA(name)) {
             return this;
         }
         return data.get(name);

@@ -35,6 +35,7 @@ public class BlenderTreeModel extends AbstractTreeTableModel {
     }
 
     private Parser parser;
+
     public BlenderTreeModel(Parser parser, BObject root) {
         super(root);
 
@@ -48,7 +49,7 @@ public class BlenderTreeModel extends AbstractTreeTableModel {
 
     @Override
     public Class getColumnClass(int column) {
-        return column==0 ? TreeTableModel.class : String.class;
+        return column == 0 ? TreeTableModel.class : String.class;
     }
 
     @Override
@@ -85,7 +86,8 @@ public class BlenderTreeModel extends AbstractTreeTableModel {
                     BStructuredObject object = (BStructuredObject) node;
                     return object.getMemoryAddress();
                 }
-            default: return null;
+            default:
+                return null;
         }
     }
 
@@ -130,7 +132,7 @@ public class BlenderTreeModel extends AbstractTreeTableModel {
         if (parent instanceof BPointer) {
             BPointer pointer = (BPointer) parent;
             List<BStructuredObject> list = parser.getStructures(pointer.getAddress());
-            return list!=null ? list.size() : 0;
+            return list != null ? list.size() : 0;
         }
         return 0;
     }

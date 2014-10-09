@@ -39,7 +39,7 @@ public class BPointer extends BObject {
 
     @Override
     public String toString() {
-        return getType().getName()+"@"+getAddress();
+        return getType().getName() + "@" + getAddress();
     }
 
     public void setParser(Parser parser) {

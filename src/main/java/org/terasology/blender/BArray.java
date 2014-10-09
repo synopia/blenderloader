@@ -3,7 +3,6 @@ package org.terasology.blender;
 import com.google.common.collect.Lists;
 
 import java.util.List;
-import java.util.StringTokenizer;
 
 /**
  * @author synopia
@@ -26,7 +25,7 @@ public class BArray extends BObject {
 
     @Override
     public <T> List<T> asList(Class<T> type) {
-        if( type==BObject.class ) {
+        if (type == BObject.class) {
             return (List<T>) list;
         }
         List<T> result = Lists.newArrayList();
@@ -38,22 +37,24 @@ public class BArray extends BObject {
 
     @Override
     public <T> T as(Class<T> type) {
-        if( type==String.class) {
+        if (type == String.class) {
             return (T) toString();
         }
         List<T> ts = asList(type);
         return (T) ts;
     }
 
-    public void add( BObject object ) {
+    public void add(BObject object) {
         list.add(object);
     }
+
     public BObject get(int index) {
-        if( index>=0 && index<size() ) {
+        if (index >= 0 && index < size()) {
             return list.get(index);
         }
         return null;
     }
+
     public BObject first() {
         return get(0);
     }
@@ -67,13 +68,13 @@ public class BArray extends BObject {
         BArray result = new BArray();
         for (BObject object : list) {
             BObject element = object.resolve(name);
-            if( element!=null ) {
+            if (element != null) {
                 result.add(element);
             }
         }
-        if( result.size()==0 ) {
+        if (result.size() == 0) {
             return null;
-        } else if( result.size()==1 ) {
+        } else if (result.size() == 1) {
             return result.first();
         }
         return result;
@@ -81,13 +82,13 @@ public class BArray extends BObject {
 
     @Override
     public String toString() {
-        if( isString() ) {
+        if (isString()) {
             StringBuilder sb = new StringBuilder();
             for (BObject object : list) {
-                if( object.as(Character.class)==0 ) {
+                if (object.as(Character.class) == 0) {
                     break;
                 }
-                sb.append( object.as(Character.class));
+                sb.append(object.as(Character.class));
             }
             return sb.toString();
         } else {

@@ -27,14 +27,17 @@ public class Parser {
 
     public static long readPointer(DataInput dis) throws IOException {
         switch (pointerSize) {
-            case 4: return dis.readInt();
-            case 8: return dis.readLong();
+            case 4:
+                return dis.readInt();
+            case 8:
+                return dis.readLong();
         }
         return 0;
     }
 
     public abstract static class BaseReader {
         public abstract void load(DataInput dis) throws IOException;
+
         String readString(DataInput dis, int size) throws IOException {
             byte buf[] = new byte[size];
             dis.readFully(buf);
@@ -44,19 +47,20 @@ public class Parser {
         String readString(DataInput dis) throws IOException {
             byte ch = -1;
             StringBuilder sb = new StringBuilder();
-            while (ch!=0) {
+            while (ch != 0) {
                 ch = dis.readByte();
-                if( ch!=0 ) {
+                if (ch != 0) {
                     sb.append((char) ch);
                 }
             }
             return sb.toString();
         }
 
-        void align( DataInput dis, int pos) throws IOException {
-            dis.skipBytes(pos%4);
+        void align(DataInput dis, int pos) throws IOException {
+            dis.skipBytes(pos % 4);
         }
     }
+
     public static class FileHeader extends BaseReader {
         public String identifier;
         public boolean littleEndian;
@@ -65,18 +69,19 @@ public class Parser {
         @Override
         public void load(DataInput dis) throws IOException {
             identifier = readString(dis, 7);
-            pointerSize = dis.readByte()=='_' ? 4 : 8;
-            littleEndian = dis.readByte()=='v';
+            pointerSize = dis.readByte() == '_' ? 4 : 8;
+            littleEndian = dis.readByte() == 'v';
             version = readString(dis, 3);
         }
 
         @Override
         public String toString() {
-            return identifier+ " v" + version+ " littleEndian="+littleEndian;
+            return identifier + " v" + version + " littleEndian=" + littleEndian;
         }
     }
+
     public static class FileBlock extends BaseReader {
-        String code="";
+        String code = "";
         int size;
         long memoryAddress;
         int sdnaIndex;
@@ -84,7 +89,7 @@ public class Parser {
         long offset;
 
         @Override
-        public void load(DataInput dis) throws IOException{
+        public void load(DataInput dis) throws IOException {
             code = readString(dis, 4);
             size = dis.readInt();
             memoryAddress = readPointer(dis);
@@ -94,7 +99,7 @@ public class Parser {
 
         @Override
         public String toString() {
-            return code+" size="+size+" memory="+memoryAddress+" sdna="+sdnaIndex + " count="+count;
+            return code + " size=" + size + " memory=" + memoryAddress + " sdna=" + sdnaIndex + " count=" + count;
         }
     }
 
@@ -127,7 +132,7 @@ public class Parser {
             int pos = 0;
             for (int i = 0; i < nameCnt; i++) {
                 String str = readString(dis);
-                pos += str.length()+1;
+                pos += str.length() + 1;
                 names.add(str);
             }
 
@@ -137,7 +142,7 @@ public class Parser {
             pos = 0;
             for (int i = 0; i < typeCnt; i++) {
                 String str = readString(dis);
-                pos += str.length()+1;
+                pos += str.length() + 1;
                 typeNames.add(str);
             }
 
@@ -152,7 +157,7 @@ public class Parser {
                 types.add(new Type(i, typeNames.get(i), length));
             }
 
-            align(dis,pos);
+            align(dis, pos);
             structureIdentifier = readString(dis, 4);
             int structureCnt = dis.readInt();
             for (int i = 0; i < structureCnt; i++) {
@@ -166,12 +171,12 @@ public class Parser {
                     short type = dis.readShort();
                     short name = dis.readShort();
 
-                    structure.addField( types.get(type), names.get(name));
+                    structure.addField(types.get(type), names.get(name));
                 }
                 structures.add(structure);
             }
             for (Structure structure : structures) {
-                structure.resolveTypes( structures );
+                structure.resolveTypes(structures);
             }
         }
     }
@@ -183,14 +188,14 @@ public class Parser {
         dis.setLittleEndian(header.littleEndian);
         sdna = new SDNA(this);
 
-        while(  !block.code.equals("ENDB")) {
+        while (!block.code.equals("ENDB")) {
             block = new FileBlock();
             block.load(dis);
             long pos = dis.position();
             block.offset = pos;
-            if( block.code.equals("DNA1")) {
+            if (block.code.equals("DNA1")) {
                 sdna.load(dis);
-            } else if( !block.code.equals("ENDB")) {
+            } else if (!block.code.equals("ENDB")) {
                 blocks.add(block);
             }
 
@@ -226,9 +231,9 @@ public class Parser {
         return sdna.structures;
     }
 
-    public Structure getStructure( String name ) {
+    public Structure getStructure(String name) {
         for (Structure structure : sdna.structures) {
-            if( structure.getName().equals(name)) {
+            if (structure.getName().equals(name)) {
                 return structure;
             }
         }
@@ -249,7 +254,7 @@ public class Parser {
         return result;
     }
 
-    private boolean any( String value, String ... any) {
+    private boolean any(String value, String... any) {
         for (String anAny : any) {
             if (anAny.equals(value)) {
                 return true;

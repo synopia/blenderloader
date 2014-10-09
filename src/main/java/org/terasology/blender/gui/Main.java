@@ -1,17 +1,16 @@
 package org.terasology.blender.gui;
 
+import org.terasology.blender.BObject;
+import org.terasology.blender.Parser;
+import org.terasology.blender.RAFDataInput;
+
+import javax.swing.*;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
-import javax.swing.JFrame;
-import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
-import org.terasology.blender.BObject;
-import org.terasology.blender.Parser;
-import org.terasology.blender.RAFDataInput;
+
 import static javax.swing.JFrame.EXIT_ON_CLOSE;
 
 /**
@@ -31,7 +30,7 @@ public class Main {
         JTreeTable table = new JTreeTable(new BlenderTreeModel(parser, root));
         frame.add(new JScrollPane(table));
 
-        frame.setSize(500,500);
+        frame.setSize(500, 500);
         frame.setVisible(true);
     }
 
