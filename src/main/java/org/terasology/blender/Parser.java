@@ -186,9 +186,6 @@ public class Parser {
             block.offset = pos;
             if( block.code.equals("DNA1")) {
                 sdna.load(dis);
-//                for (Structure structure : sdna.structures) {
-//                    System.out.println(structure);
-//                }
             } else if( !block.code.equals("ENDB")) {
                 blocks.add(block);
             }
@@ -202,7 +199,6 @@ public class Parser {
             BArray target = new BArray(structure);
             root.add(target);
             dis.seek(b.offset);
-            System.out.println(structure.getName() + " (" + b.count + "x, "+b.size+"b)");
             memory.add(b.memoryAddress);
             List<BStructuredObject> objects = Lists.newArrayList();
             for (int i = 0; i < b.count; i++) {
