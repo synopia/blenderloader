@@ -6,10 +6,13 @@ import org.terasology.blender.RAFDataInput;
 
 import javax.swing.*;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
+import java.util.zip.GZIPInputStream;
 
 import static javax.swing.JFrame.EXIT_ON_CLOSE;
 
@@ -19,8 +22,20 @@ import static javax.swing.JFrame.EXIT_ON_CLOSE;
 public class Main {
 
     public void start() throws URISyntaxException, IOException {
-        File file = new File(this.getClass().getResource("/killerbunny103_export.blend").toURI());
-        RAFDataInput dis = new RAFDataInput(new RandomAccessFile(file, "r"));
+        File file = new File(this.getClass().getResource("/Skeleton.blend").toURI());
+        GZIPInputStream zipStream = new GZIPInputStream(new FileInputStream(file));
+        FileOutputStream outputStream = new FileOutputStream("file.blend");
+        byte[] buf = new byte[4096];
+        while (zipStream.available()>0) {
+            int bytes = zipStream.read(buf);
+            if( bytes>0 ) {
+                outputStream.write(buf, 0, bytes);
+            }
+        }
+        outputStream.close();
+        zipStream.close();
+
+        RAFDataInput dis = new RAFDataInput(new RandomAccessFile("file.blend", "r"));
         Parser parser = new Parser(dis);
         BObject root = parser.load();
 

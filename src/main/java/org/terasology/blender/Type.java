@@ -33,6 +33,8 @@ public class Type {
                 return new BPrimitiveObject(this, dis.readLong());
             case "char":
                 return new BPrimitiveObject(this, (char) dis.readByte());
+            case "double":
+                return new BPrimitiveObject(this, dis.readDouble());
             default:
                 throw new IllegalStateException("Unknown primitive type " + name);
         }

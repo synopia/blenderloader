@@ -57,7 +57,11 @@ public class Parser {
         }
 
         void align(DataInput dis, int pos) throws IOException {
-            dis.skipBytes(pos % 4);
+            while( (pos&3)!=0 ) {
+                dis.skipBytes(1);
+                pos ++;
+            }
+//            dis.skipBytes(4-(pos % 4));
         }
     }
 

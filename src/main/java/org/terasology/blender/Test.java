@@ -4,12 +4,16 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
 /**
  * @author synopia
@@ -17,7 +21,21 @@ import java.util.Map;
 public class Test {
 
     public static void main(String[] args) throws IOException, URISyntaxException {
-        File file = new File(Test.class.getResource("/killerbunny103_export.blend").toURI());
+        File file = new File(Test.class.getResource("/blackpawn.blend").toURI());
+/*
+        File file = new File(Test.class.getResource("/Skeleton.blend").toURI());
+        GZIPInputStream zipStream = new GZIPInputStream(new FileInputStream(file));
+        FileOutputStream outputStream = new FileOutputStream("file.blend");
+        byte[] buf = new byte[4096];
+        while (zipStream.available()>0) {
+            int bytes = zipStream.read(buf);
+            if( bytes>0 ) {
+                outputStream.write(buf, 0, bytes);
+            }
+        }
+        outputStream.close();
+        zipStream.close();
+*/
         RAFDataInput dis = new RAFDataInput(new RandomAccessFile(file, "r"));
         Parser parser = new Parser(dis);
         BObject root = parser.load();
@@ -34,7 +52,7 @@ public class Test {
         Map<String, BObject> boneMap = Maps.newHashMap();
         Map<String, BObject> defgMap = Maps.newHashMap();
         List<String> groups = Lists.newArrayList();
-        groups.add("root");
+//        groups.add("root");
         for (BObject object : defGroups) {
             String name = object.resolve("name").as(String.class);
             groups.add(name);
@@ -57,10 +75,12 @@ public class Test {
 
             BObject group = defgMap.get(name);
             BObject bone = boneMap.get(name);
-            BStructuredObject parent = bone.resolve("parent").as(BStructuredObject.class);
             int parentId = -1;
-            if (parent != null) {
-                parentId = groups.indexOf(parent.resolve("name").as(String.class));
+            if( bone!=null ) {
+                BStructuredObject parent = bone.resolve("parent").as(BStructuredObject.class);
+                if (parent != null) {
+                    parentId = groups.indexOf(parent.resolve("name").as(String.class));
+                }
             }
             sb.append("\t\"").append(name).append("\" ").append(parentId).append(" ( ");
 
@@ -114,6 +134,6 @@ public class Test {
     }
 
     private static String f(float number) {
-        return String.format("%.6f", number);
+        return String.format(Locale.ENGLISH,"%.6f", number);
     }
 }
