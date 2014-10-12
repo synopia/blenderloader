@@ -1,4 +1,4 @@
-package org.terasology.blender
+package org.terasology.blender.api
 
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -46,8 +46,8 @@ class Field {
         }
         if (isPointer()) {
             input = input.dup()
-            def position = input.goTo(input.readPointer())
-            if (position != 0) {
+            def type = input.goTo(input.readPointer())
+            if (type != null) {
                 return new BArray(type, input, -1)
             } else {
                 return BObject.NULL

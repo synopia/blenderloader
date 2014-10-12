@@ -1,4 +1,7 @@
-package org.terasology.blender
+package org.terasology.blender.api
+
+import org.terasology.blender.mesh.Mesh
+import org.terasology.blender.mesh.Skeleton
 
 import java.util.zip.GZIPInputStream
 
@@ -14,12 +17,34 @@ class BlenderParser {
     StructureParser sdna
     List<MemoryBlock> memory = []
     Map<String, Type> types = [:]
+    Mesh mesh
 
     BlenderParser(InputStream inputStream) {
         this.inputStream = new BufferedInputStream(inputStream);
     }
 
-    def findByType(String typeName) {
+    static BlenderParser load(InputStream input) {
+        def parser = new BlenderParser(input)
+        parser.load()
+        parser
+    }
+
+    Mesh getMesh(int i = 0) {
+        def objs = findByType("Object")
+        def obj = objs.find { o ->
+            def data = o.data.get()
+            data.size() == 1 && data.get(0).type.name == "Mesh" && i-- <= 0
+        }
+        def arm = objs.find { o ->
+            def data = o.data.get()
+            data.size() == 1 && data.get(0).type.name == "bArmature"
+        }
+        def skeleton = new Skeleton(arm, this)
+        mesh = new Mesh(obj, skeleton)
+        mesh
+    }
+
+    List<BObject> findByType(String typeName) {
         List<BObject> result = []
         def type = types[typeName]
         if (type == null) {
@@ -35,7 +60,7 @@ class BlenderParser {
         result
     }
 
-    def load() {
+    void load() {
         loadFile()
         scanFile()
         for (Type type : sdna.types.values()) {
@@ -43,7 +68,7 @@ class BlenderParser {
         }
     }
 
-    def loadFile() {
+    private def loadFile() {
         inputStream.mark(12)
         String fileId
         fileId = loadHeader(inputStream)
@@ -67,7 +92,7 @@ class BlenderParser {
         input.parser = this
     }
 
-    def scanFile() {
+    private def scanFile() {
         sdna = new StructureParser()
         MemoryBlock block = new MemoryBlock()
         while (block.code != "ENDB") {
@@ -94,7 +119,7 @@ class BlenderParser {
         fileId
     }
 
-    static String readString(DataInput dis, int size) throws IOException {
+    private static String readString(DataInput dis, int size) throws IOException {
         byte[] buf = new byte[size];
         dis.readFully(buf);
         return new String(buf);

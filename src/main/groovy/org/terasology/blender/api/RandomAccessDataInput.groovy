@@ -1,4 +1,4 @@
-package org.terasology.blender
+package org.terasology.blender.api
 
 import com.google.common.io.ByteArrayDataInput
 import com.google.common.io.ByteStreams
@@ -33,13 +33,13 @@ class RandomAccessDataInput implements ByteArrayDataInput {
     def goTo(long address) {
         block = parser.memory.find({ b -> b.contains(address) })
         if (block == null) {
-            return 0
+            return null
         }
         int offset = address - block.address
 
         seek(block.position + offset)
 
-        return position
+        return parser.sdna.structures.get(block.sdnaIndex)
     }
 
     def seek(int pos) {
