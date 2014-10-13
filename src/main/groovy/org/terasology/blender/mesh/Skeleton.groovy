@@ -3,6 +3,10 @@ package org.terasology.blender.mesh
 import org.terasology.blender.api.BObject
 import org.terasology.blender.api.BlenderParser
 
+import javax.vecmath.Matrix3f
+import javax.vecmath.Matrix4f
+import javax.vecmath.Quat4f
+
 /**
  * Created by synopia on 12/10/14.
  */
@@ -20,13 +24,30 @@ class Skeleton {
         float quatY
         float quatZ
         float quatW
+
+        Matrix4f matrix;
+        Matrix4f getLocalMatrix() {
+            Matrix4f mat = new Matrix4f()
+            mat.setIdentity();
+            if( parent!=null ) {
+                mat = parent.getLocalMatrix();
+            }
+            mat.mul(mat, matrix)
+
+            return mat;
+        }
+        Matrix4f getInvMatrix() {
+            def matrix = getLocalMatrix()
+            matrix.invert()
+            return matrix
+        }
     }
     List<Bone> bones = []
     BlenderParser parser
 
     Skeleton(BObject armature, BlenderParser parser) {
         List<Float> worldMatrix = armature.obmat.get()
-        println worldMatrix
+        Matrix4f mat = new Matrix4f(worldMatrix.toArray(new float[16]))
         this.parser = parser
 
         def groups = parser.findByType("bDeformGroup")
@@ -39,21 +60,26 @@ class Skeleton {
         bones.eachWithIndex { b, i ->
             String name = b.name.get()
 
+            Matrix4f matrix = new Matrix4f(b.bone.arm_mat.get().toArray(new float[16]));
+//            matrix.mul(mat, matrix)
+            Quat4f quat = new Quat4f();
+            quat.set(matrix)
+            quat.normalize()
+            println quat
+
             def bone = new Bone()
             bone.group = boneToGroup[name]
             bone.id = i
             bone.name = name
-            bone.locX = b.pose_mat[12].get() - worldMatrix.get(12)
-            bone.locY = b.pose_mat[13].get() - worldMatrix.get(13)
-            bone.locZ = b.pose_mat[14].get() - worldMatrix.get(14)
-            bone.quatW = b.quat[0].get()
-            bone.quatX = b.quat[1].get()
-            bone.quatY = b.quat[2].get()
-            bone.quatZ = b.quat[3].get()
+            bone.locX = matrix.getElement(3,0) - worldMatrix.get(12)
+            bone.locY = matrix.getElement(3,1) - worldMatrix.get(13)
+            bone.locZ = matrix.getElement(3,2) - worldMatrix.get(14)
+            bone.quatW = quat.w
+            bone.quatX = quat.x
+            bone.quatY = quat.y
+            bone.quatZ = quat.z
+            bone.matrix = matrix;
 
-//            println b.pose_tail.get()
-//            println b.pose_head.get()
-//            println b.pose_mat.get()
             this.bones << bone
         }
         bones.eachWithIndex { b, i ->

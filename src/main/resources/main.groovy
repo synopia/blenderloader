@@ -5,7 +5,7 @@ import org.terasology.blender.api.BlenderParser
 //def file = "Skeleton.blend"
 //def file = "blackpawn.blend"
 def file = "redpawn.blend"
-def parser = new BlenderParser(new FileInputStream("../../test/resources/$file"))
+def parser = new BlenderParser(new FileInputStream(file))
 
 parser.load()
 def mesh = parser.getMesh(3)
@@ -17,8 +17,7 @@ def skeleton = mesh.skeleton
 //    println "$m.id.name $m.totloop $m.totvert $m.totpoly $m.totface $m.totedge"
 //}
 GStringTemplateEngine engine = new GStringTemplateEngine()
-def template = engine.createTemplate("""
-MD5Version 10
+def template = engine.createTemplate("""MD5Version 10
 commandline "Exported from blenderloader"
 
 numJoints <%= bones.size() %>
@@ -49,7 +48,7 @@ mesh {
 }
 """)
 def md5mesh = template.make(["mesh": mesh, "bones": skeleton.bones])
-def writer = new FileWriter("../../../test.md5mesh")
+def writer = new FileWriter("test.md5mesh")
 writer.write(md5mesh)
 writer.close()
 

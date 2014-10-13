@@ -2,6 +2,10 @@ package org.terasology.blender.mesh
 
 import org.terasology.blender.api.BObject
 
+import javax.vecmath.Matrix4f
+import javax.vecmath.Quat4f
+import javax.vecmath.Vector3f
+
 /**
  * Created by synopia on 12/10/14.
  */
@@ -37,7 +41,7 @@ class Mesh {
         this.skeleton = skeleton
         mesh = object.data.get()[0]
         objectMatrix = object.obmat.get()
-        println objectMatrix
+//        Matrix4f mat = new Matrix4f(objectMatrix.toArray(new float[16]))
         loadWeights()
         loadTris()
         loadVertices()
@@ -72,16 +76,35 @@ class Mesh {
         }
     }
 
+    public static void mul(Quat4f q, Vector3f w) {
+        float rx = q.w * w.x + q.y * w.z - q.z * w.y;
+        float ry = q.w * w.y + q.z * w.x - q.x * w.z;
+        float rz = q.w * w.z + q.x * w.y - q.y * w.x;
+        float rw = -q.x * w.x - q.y * w.y - q.z * w.z;
+        q.set(rx, ry, rz, rw);
+    }
+
     private void loadWeights() {
         int max = mesh.totvert.get()
         mesh.mvert.get().eachWithIndex { vert, i ->
             if (i < max) {
                 def weight = new Weight()
                 weight.bias = 1
-                weight.x = vert.co[0].get() - objectMatrix.get(12)
-                weight.y = vert.co[1].get() - objectMatrix.get(13)
-                weight.z = vert.co[2].get() - objectMatrix.get(14)
                 weight.bone = skeleton.getBone(mesh.dvert[i].dw.def_nr.get())
+                Vector3f v = new Vector3f(vert.co[0].get(), vert.co[1].get(), vert.co[2].get());
+
+                Vector3f bonePos = new Vector3f(weight.bone.locX, weight.bone.locY, weight.bone.locZ )
+                Quat4f rot = new Quat4f(weight.bone.quatX, weight.bone.quatY, weight.bone.quatZ, weight.bone.quatW);
+
+                v.sub(bonePos);
+                Quat4f q = new Quat4f(rot)
+                mul(q, v);
+                rot.inverse();
+                q.mul(rot)
+
+                weight.x = q.x
+                weight.y = q.y
+                weight.z = q.z
 
                 weights << weight
             }
