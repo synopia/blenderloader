@@ -75,10 +75,6 @@ class Skeleton {
             quat.set(finalMat)
             quat.normalize()
 
-            println( name)
-            println( b.quat.get())
-            println( quat)
-
             def bone = new Bone()
             bone.group = boneToGroup[name]
             bone.id = i
