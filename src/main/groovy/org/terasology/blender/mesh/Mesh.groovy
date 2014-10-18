@@ -95,6 +95,7 @@ class Mesh {
 
                 Vector3f bonePos = new Vector3f(weight.bone.locX, weight.bone.locY, weight.bone.locZ )
                 Quat4f rot = new Quat4f(weight.bone.quatX, weight.bone.quatY, weight.bone.quatZ, weight.bone.quatW);
+                rot.inverse()
 
                 v.sub(bonePos);
                 Quat4f q = new Quat4f(rot)

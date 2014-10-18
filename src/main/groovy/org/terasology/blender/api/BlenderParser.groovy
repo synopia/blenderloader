@@ -29,19 +29,23 @@ class BlenderParser {
         parser
     }
 
-    Mesh getMesh(int i = 0) {
+    Mesh getMesh() {
         def objs = findByType("Object")
         def obj = objs.find { o ->
-            def data = o.data.get()
-            data.size() == 1 && data.get(0).type.name == "Mesh" && i-- <= 0
+            def mesh = o.data.get().get(0)
+            mesh.type.name == "Mesh" && mesh.totvert.get()>0 && mesh.totpoly.get()>0 && mesh.totloop.get()>0 && mesh.dvert!=BObject.NULL
         }
         def arm = objs.find { o ->
             def data = o.data.get()
             data.size() == 1 && data.get(0).type.name == "bArmature"
         }
-        def skeleton = new Skeleton(arm, this)
-        mesh = new Mesh(obj, skeleton)
-        mesh
+        if( obj!=null && arm!=null ) {
+            println "Found mesh ${obj.id.name} and a armature"
+            def skeleton = new Skeleton(arm, this)
+            mesh = new Mesh(obj, skeleton)
+            return mesh
+        }
+        return null;
     }
 
     List<BObject> findByType(String typeName) {
